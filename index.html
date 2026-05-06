@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --light-gray: #f8f9fa;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), #1a2530);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            color: var(--secondary);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 3px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .panel-header {
+            background: var(--light);
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-header h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-header i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 0; /* Allow shrinking */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Table - COMPACT VERSION */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px; /* Reduced from 900px */
+        }
+
+        thead {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #eee;
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        td {
+            padding: 10px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        /* Compact table columns */
+        td:nth-child(1) { /* ID column */
+            width: 100px;
+            max-width: 100px;
+        }
+        
+        td:nth-child(2) { /* Name column */
+            width: 180px;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        td:nth-child(3) { /* Category column */
+            width: 120px;
+            max-width: 120px;
+        }
+        
+        td:nth-child(4) { /* Quantity column */
+            width: 90px;
+            max-width: 90px;
+        }
+        
+        td:nth-child(5) { /* Price column */
+            width: 100px;
+            max-width: 100px;
+        }
+        
+        td:nth-child(6) { /* Total Value column */
+            width: 110px;
+            max-width: 110px;
+        }
+        
+        td:nth-child(7) { /* Actions column */
+            width: 150px;
+            max-width: 150px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .category-electronics {
+            background-color: #e8f4fd;
+            color: #2980b9;
+        }
+
+        .category-clothing {
+            background-color: #fde8f1;
+            color: #e84393;
+        }
+
+        .category-food {
+            background-color: #e8f8ef;
+            color: #27ae60;
+        }
+
+        .category-furniture {
+            background-color: #fef9e7;
+            color: #f39c12;
+        }
+
+        .category-other {
+            background-color: #f2f3f5;
+            color: #7f8c8d;
+        }
+
+        .quantity-low {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .quantity-adequate {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Search Section */
+        .search-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .search-btn-container {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .close-alert {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: var(--gray);
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                min-width: auto;
+                justify-content: center;
+            }
+            
+            .stats {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .panel-body {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .search-container {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                min-width: 600px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .logo i {
+                font-size: 1.8rem;
+            }
+            
+            .stat-item {
+                min-width: 80px;
+                padding: 8px 12px;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .panel-header {
+                padding: 12px 15px;
+            }
+            
+            .panel-header h2 {
+                font-size: 1.1rem;
+            }
+            
+            table {
+                min-width: 500px;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .btn-sm {
+                width: 100%;
+            }
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        @media (max-width: 360px) {
+            table {
+                min-width: 450px;
+            }
+            
+            .dashboard {
+                gap: 10px;
+            }
+        }
+        /* Header Button Styles */
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .header-btn {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-btn.delivery {
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.8), rgba(22, 160, 133, 0.8));
+            border-color: rgba(26, 188, 156, 0.3);
+        }
+
+        .header-btn.dsa {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.8), rgba(142, 68, 173, 0.8));
+            border-color: rgba(155, 89, 182, 0.3);
+        }
+
+        .header-btn.delivery:hover {
+            background: linear-gradient(135deg, rgba(26, 188, 156, 1), rgba(22, 160, 133, 1));
+        }
+
+        .header-btn.dsa:hover {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 1), rgba(142, 68, 173, 1));
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-buttons {
+                margin-left: 0;
+                margin-top: 15px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-btn {
+                flex: 1;
+                justify-content: center;
+                min-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-boxes"></i>
+                <div>
+                    <h1>Inventory<span>Manager</span></h1>
+                    <p>DSA-based Inventory & Fulfilment System</p>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-products">0</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-value">$0</div>
+                    <div class="stat-label">Total Value</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="low-stock">0</div>
+                    <div class="stat-label">Low Stock</div>
+                </div>
+            </div>
+             <div class="header-buttons">
+                <!-- Removed Supply Chain Button -->
+                <a href="delivery.html" class="header-btn delivery">
+                  <i class="fas fa-route"></i>
+                  Fulfilment
+                </a>
+                <a href="DSA.html" class="header-btn dsa">
+                    <i class="fas fa-code"></i>
+                    DSA Used
+                </a>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <!-- Left Column: Add and Update Forms -->
+            <div>
+                <!-- Add Product Form -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
+                    </div>
+                    <div class="panel-body">
+                        <form id="add-product-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="product-id">Product ID *</label>
+                                    <input type="text" id="product-id" name="id" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-name">Product Name *</label>
+                                    <input type="text" id="product-name" name="name" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="category">Category *</label>
+                                    <select id="category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Electronics">Electronics</option>
+                                        <option value="Clothing">Clothing</option>
+                                        <option value="Food">Food</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="quantity">Quantity *</label>
+                                    <input type="number" id="quantity" name="quantity" min="0" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Price ($) *</label>
+                                <input type="number" id="price" name="price" min="0" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Add Product
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Update Product Form -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-edit"></i> Update Product</h2>
+                    </div>
+                    <div class="panel-body">
+                        <form id="update-product-form">
+                            <div class="form-group">
+                                <label for="update-id">Product ID *</label>
+                                <input type="text" id="update-id" name="id" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="update-quantity">New Quantity</label>
+                                    <input type="number" id="update-quantity" name="quantity" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="update-price">New Price ($)</label>
+                                    <input type="number" id="update-price" name="price" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <p class="hint">Enter at least one field to update (quantity or price)</p>
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-sync-alt"></i> Update Product
+                                </button>
+                                <button type="button" id="delete-product-btn" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Search and Table -->
+            <div>
+                <!-- Search Products Form -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-search"></i> Search Products</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="search-container">
+                            <div class="form-group">
+                                <label for="search-id">By ID</label>
+                                <input type="text" id="search-id" placeholder="Product ID">
+                            </div>
+                            <div class="form-group">
+                                <label for="search-name">By Name</label>
+                                <input type="text" id="search-name" placeholder="Product name">
+                            </div>
+                            <div class="form-group">
+                                <label for="search-category">By Category</label>
+                                <select id="search-category">
+                                    <option value="">All Categories</option>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Clothing">Clothing</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Furniture">Furniture</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="min-price">Min Price</label>
+                                <input type="number" id="min-price" placeholder="$ Min" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-price">Max Price</label>
+                                <input type="number" id="max-price" placeholder="$ Max" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="search-btn-container">
+                            <button id="search-btn" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button id="clear-search-btn" class="btn">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                            <button id="refresh-all-btn" class="btn btn-success">
+                                <i class="fas fa-redo"></i> Refresh All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-box-open"></i> Inventory</h2>
+                        <div id="table-summary">Showing 0 products</div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="alert-container"></div>
+                        <div class="table-container">
+                            <table id="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-body">
+                                    <!-- Table rows will be inserted here by JavaScript -->
+                                    <tr id="loading-row">
+                                        <td colspan="7">
+                                            <div class="loading">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                                <p>Loading inventory data...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Inventory Management System &copy; <span id="current-year">2023</span> | DSA Project: Hash Tables, BST, Graph Algorithms</p>
+            <p>Emmanuel Charlie Mukange || Zda24b029</p>
+        </footer>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5001/api';
+        const PRODUCTS_ENDPOINT = `${API_BASE_URL}/products`;
+
+        // DOM Elements
+        const addProductForm = document.getElementById('add-product-form');
+        const updateProductForm = document.getElementById('update-product-form');
+        const deleteProductBtn = document.getElementById('delete-product-btn');
+        const searchBtn = document.getElementById('search-btn');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const refreshAllBtn = document.getElementById('refresh-all-btn');
+        const productsTableBody = document.getElementById('products-table-body');
+        const alertContainer = document.getElementById('alert-container');
+        const tableSummary = document.getElementById('table-summary');
+        
+        // Stats elements
+        const totalProductsEl = document.getElementById('total-products');
+        const totalValueEl = document.getElementById('total-value');
+        const lowStockEl = document.getElementById('low-stock');
+        
+        // Search elements
+        const searchIdEl = document.getElementById('search-id');
+        const searchNameEl = document.getElementById('search-name');
+        const searchCategoryEl = document.getElementById('search-category');
+        const minPriceEl = document.getElementById('min-price');
+        const maxPriceEl = document.getElementById('max-price');
+
+        // State variables
+        let currentProducts = [];
+        let currentSearchParams = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Load initial data
+            loadAllProducts();
+            
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Add product form submission
+            addProductForm.addEventListener('submit', handleAddProduct);
+            
+            // Update product form submission
+            updateProductForm.addEventListener('submit', handleUpdateProduct);
+            
+            // Delete product button
+            deleteProductBtn.addEventListener('click', handleDeleteProduct);
+            
+            // Search button
+            searchBtn.addEventListener('click', handleSearch);
+            
+            // Clear search button
+            clearSearchBtn.addEventListener('click', clearSearch);
+            
+            // Refresh all button
+            refreshAllBtn.addEventListener('click', loadAllProducts);
+            
+            // Allow Enter key in search fields to trigger search
+            const searchInputs = [searchIdEl, searchNameEl, searchCategoryEl, minPriceEl, maxPriceEl];
+            searchInputs.forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleSearch();
+                    }
+                });
+            });
+        }
+
+        // Load all products from the API
+        async function loadAllProducts() {
+            showLoading();
+            
+            try {
+                const response = await fetch(PRODUCTS_ENDPOINT);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch products: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const products = data.products || [];
+                currentProducts = products;
+                currentSearchParams = {};
+                renderProductsTable(products);
+                updateStats(products);
+                showAlert('Inventory loaded successfully', 'success');
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showAlert(`Error loading products: ${error.message}`, 'error');
+                renderEmptyTable();
+            }
+        }
+
+        // Handle adding a new product
+        async function handleAddProduct(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(addProductForm);
+            const productData = {
+                id: formData.get('id'),
+                name: formData.get('name'),
+                category: formData.get('category'),
+                quantity: parseInt(formData.get('quantity')),
+                price: parseFloat(formData.get('price'))
+            };
+            
+            // Validate form data
+            if (!validateProductData(productData, true)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(PRODUCTS_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to add product');
+                }
+                
+                // Clear the form
+                addProductForm.reset();
+                
+                // Refresh the table
+                if (Object.keys(currentSearchParams).length === 0) {
+                    loadAllProducts();
+                } else {
+                    performSearch(currentSearchParams);
+                }
+                
+                showAlert('Product added successfully', 'success');
+            } catch (error) {
+                console.error('Error adding product:', error);
+                showAlert(`Error adding product: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle updating a product
+        async function handleUpdateProduct(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(updateProductForm);
+            const productId = formData.get('id');
+            const quantity = formData.get('quantity');
+            const price = formData.get('price');
+            
+            if (!productId) {
+                showAlert('Product ID is required for update', 'error');
+                return;
+            }
+            
+            // Check if at least one field is provided
+            if (!quantity && !price) {
+                showAlert('Please provide at least one field to update (quantity or price)', 'error');
+                return;
+            }
+            
+            const updateData = {};
+            if (quantity) updateData.quantity = parseInt(quantity);
+            if (price) updateData.price = parseFloat(price);
+            
+            try {
+                const response = await fetch(`${PRODUCTS_ENDPOINT}/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to update product');
+                }
+                
+                // Clear the form
+                updateProductForm.reset();
+                
+                // Refresh the table
+                if (Object.keys(currentSearchParams).length === 0) {
+                    loadAllProducts();
+                } else {
+                    performSearch(currentSearchParams);
+                }
+                
+                showAlert('Product updated successfully', 'success');
+            } catch (error) {
+                console.error('Error updating product:', error);
+                showAlert(`Error updating product: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle deleting a product
+        async function handleDeleteProduct() {
+            const productId = document.getElementById('update-id').value;
+            
+            if (!productId) {
+                showAlert('Please enter a Product ID to delete', 'error');
+                return;
+            }
+            
+            // Confirm deletion
+            if (!confirm(`Are you sure you want to delete product with ID: ${productId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${PRODUCTS_ENDPOINT}/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to delete product');
+                }
+                
+                // Clear the form
+                updateProductForm.reset();
+                
+                // Refresh the table
+                if (Object.keys(currentSearchParams).length === 0) {
+                    loadAllProducts();
+                } else {
+                    performSearch(currentSearchParams);
+                }
+                
+                showAlert('Product deleted successfully', 'success');
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showAlert(`Error deleting product: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle search
+        function handleSearch() {
+            const searchParams = {};
+            
+            if (searchIdEl.value) searchParams.id = searchIdEl.value;
+            if (searchNameEl.value) searchParams.name = searchNameEl.value;
+            if (searchCategoryEl.value) searchParams.category = searchCategoryEl.value;
+            if (minPriceEl.value) searchParams.min_price = parseFloat(minPriceEl.value);
+            if (maxPriceEl.value) searchParams.max_price = parseFloat(maxPriceEl.value);
+            
+            // If no search parameters, load all products
+            if (Object.keys(searchParams).length === 0) {
+                loadAllProducts();
+                return;
+            }
+            
+            performSearch(searchParams);
+        }
+
+        // Perform search with parameters
+        async function performSearch(searchParams) {
+            showLoading();
+            currentSearchParams = searchParams;
+            
+            try {
+                // Build query string
+                const queryParams = new URLSearchParams();
+                for (const [key, value] of Object.entries(searchParams)) {
+                    queryParams.append(key, value);
+                }
+                
+                const url = `${PRODUCTS_ENDPOINT}/search?${queryParams.toString()}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Search failed: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const products = data.results || [];
+                currentProducts = products;
+                renderProductsTable(products);
+                updateStats(products);
+
+                if (products.length === 0) {
+                    showAlert('No products found matching your search criteria', 'info');
+                } else {
+                    showAlert(`Found ${products.length} product(s) matching your search`, 'success');
+                }
+            } catch (error) {
+                console.error('Error searching products:', error);
+                showAlert(`Error searching products: ${error.message}`, 'error');
+                renderEmptyTable();
+            }
+        }
+
+        // Clear search and show all products
+        function clearSearch() {
+            searchIdEl.value = '';
+            searchNameEl.value = '';
+            searchCategoryEl.value = '';
+            minPriceEl.value = '';
+            maxPriceEl.value = '';
+            loadAllProducts();
+        }
+
+        // Render products table
+        function renderProductsTable(products) {
+            if (!products || products.length === 0) {
+                renderEmptyTable();
+                return;
+            }
+            
+            // Clear table body
+            productsTableBody.innerHTML = '';
+            
+            // Add rows for each product
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                const totalValue = product.quantity * product.price;
+                const quantityClass = product.quantity < 10 ? 'quantity-low' : 'quantity-adequate';
+                const categoryClass = `category-${product.category.toLowerCase()}`;
+                
+                row.innerHTML = `
+                    <td><strong>${product.id}</strong></td>
+                    <td>${product.name}</td>
+                    <td><span class="category-badge ${categoryClass}">${product.category}</span></td>
+                    <td class="${quantityClass}">${product.quantity}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td>$${totalValue.toFixed(2)}</td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-warning" onclick="quickUpdateQuantity('${product.id}')">
+                            <i class="fas fa-plus-circle"></i> Stock
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="quickUpdatePrice('${product.id}')">
+                            <i class="fas fa-dollar-sign"></i> Price
+                        </button>
+                    </td>
+                `;
+                
+                productsTableBody.appendChild(row);
+            });
+            
+            // Update table summary
+            tableSummary.textContent = `Showing ${products.length} product(s)`;
+        }
+
+        // Render empty table state
+        function renderEmptyTable() {
+            productsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="loading">
+                            <i class="fas fa-box-open"></i>
+                            <p>No products found</p>
+                            <p>Add a new product or try a different search</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            tableSummary.textContent = 'Showing 0 products';
+            updateStats([]);
+        }
+
+        // Show loading state in table
+        function showLoading() {
+            productsTableBody.innerHTML = `
+                <tr id="loading-row">
+                    <td colspan="7">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading inventory data...</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Update dashboard statistics
+        function updateStats(products) {
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const lowStockCount = products.filter(product => product.quantity < 10).length;
+            
+            totalProductsEl.textContent = totalProducts;
+            totalValueEl.textContent = `$${totalValue.toFixed(2)}`;
+            lowStockEl.textContent = lowStockCount;
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlerts = alertContainer.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type}`;
+            alertEl.innerHTML = `
+                <span>${message}</span>
+                <button class="close-alert">&times;</button>
+            `;
+            
+            alertContainer.appendChild(alertEl);
+            
+            // Add event listener to close button
+            alertEl.querySelector('.close-alert').addEventListener('click', () => {
+                alertEl.remove();
+            });
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertEl.parentNode) {
+                    alertEl.remove();
+                }
+            }, 5000);
+        }
+
+        // Validate product data
+        function validateProductData(productData, isNew = false) {
+            // Check required fields for new products
+            if (isNew) {
+                if (!productData.id || !productData.name || !productData.category || 
+                    productData.quantity === undefined || productData.price === undefined) {
+                    showAlert('All fields are required for new products', 'error');
+                    return false;
+                }
+            }
+            
+            // Validate ID (alphanumeric)
+            if (productData.id && !/^[a-zA-Z0-9-_]+$/.test(productData.id)) {
+                showAlert('Product ID can only contain letters, numbers, hyphens, and underscores', 'error');
+                return false;
+            }
+            
+            // Validate quantity
+            if (productData.quantity !== undefined && (productData.quantity < 0 || !Number.isInteger(productData.quantity))) {
+                showAlert('Quantity must be a non-negative integer', 'error');
+                return false;
+            }
+            
+            // Validate price
+            if (productData.price !== undefined && (productData.price < 0 || isNaN(productData.price))) {
+                showAlert('Price must be a non-negative number', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Quick update quantity (called from table row button)
+        async function quickUpdateQuantity(productId) {
+            const newQuantity = prompt(`Enter new quantity for product ${productId}:`, "10");
+            
+            if (newQuantity === null) return; // User cancelled
+            
+            const quantity = parseInt(newQuantity);
+            if (isNaN(quantity) || quantity < 0) {
+                showAlert('Invalid quantity. Must be a non-negative number.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${PRODUCTS_ENDPOINT}/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ quantity })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to update quantity');
+                }
+                
+                // Refresh the table
+                if (Object.keys(currentSearchParams).length === 0) {
+                    loadAllProducts();
+                } else {
+                    performSearch(currentSearchParams);
+                }
+                
+                showAlert(`Quantity updated to ${quantity} for product ${productId}`, 'success');
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                showAlert(`Error updating quantity: ${error.message}`, 'error');
+            }
+        }
+
+        // Quick update price (called from table row button)
+        async function quickUpdatePrice(productId) {
+            const newPrice = prompt(`Enter new price for product ${productId}:`, "0.00");
+            
+            if (newPrice === null) return; // User cancelled
+            
+            const price = parseFloat(newPrice);
+            if (isNaN(price) || price < 0) {
+                showAlert('Invalid price. Must be a non-negative number.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${PRODUCTS_ENDPOINT}/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ price })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to update price');
+                }
+                
+                // Refresh the table
+                if (Object.keys(currentSearchParams).length === 0) {
+                    loadAllProducts();
+                } else {
+                    performSearch(currentSearchParams);
+                }
+                
+                showAlert(`Price updated to $${price.toFixed(2)} for product ${productId}`, 'success');
+            } catch (error) {
+                console.error('Error updating price:', error);
+                showAlert(`Error updating price: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Graph Visualization | Supply Chain</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --purple: #9b59b6;
+            --teal: #1abc9c;
+            --light: #ecf0f1;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #1a2530);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--teal);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--teal);
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Graph Panel */
+        .graph-panel {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .graph-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        /* Graph Container */
+        .graph-container {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        /* Graph Nodes - SMALLER SIZE */
+        .graph-node {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 60px;
+            height: 60px;
+        }
+
+        .node-supplier {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .node-product {
+            background: white;
+            color: var(--primary);
+            border: 2px solid #ddd;
+        }
+
+        .node-failed {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border-color: white;
+        }
+
+        .node-at-risk {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border-color: white;
+        }
+
+        .node-safe {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            color: white;
+            border-color: white;
+        }
+
+        .node-icon {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .node-label {
+            font-weight: 600;
+            font-size: 0.7rem;
+            margin-bottom: 1px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .node-details {
+            font-size: 0.6rem;
+            opacity: 0.9;
+        }
+
+        /* Connections - MORE VISIBLE */
+        .graph-connection {
+            position: absolute;
+            height: 2px;
+            background: #95a5a6;
+            transform-origin: 0 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .connection-normal {
+            background: #95a5a6;
+            opacity: 0.6;
+        }
+
+        .connection-failed {
+            background: var(--danger);
+            height: 3px;
+            box-shadow: 0 0 4px var(--danger);
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .connection-at-risk {
+            background: var(--warning);
+            height: 3px;
+            box-shadow: 0 0 4px var(--warning);
+            opacity: 1;
+            z-index: 2;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 1px solid #eee;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title i {
+            color: var(--secondary);
+        }
+
+        /* Node Details */
+        .node-details-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .details-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .details-icon {
+            font-size: 1.8rem;
+        }
+
+        .details-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .details-content {
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .details-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .details-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .item-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-text {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .color-supplier {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: 1px solid white;
+        }
+
+        .color-product {
+            background: white;
+            border: 2px solid #ddd;
+        }
+
+        .color-failed {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: 1px solid white;
+        }
+
+        .color-at-risk {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border: 1px solid white;
+        }
+
+        .color-safe {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            border: 1px solid white;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 3px solid var(--secondary);
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 3px solid var(--warning);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 3px solid var(--danger);
+        }
+
+        .close-alert {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #eee;
+            }
+            
+            .graph-container {
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .graph-controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .graph-node {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .node-icon {
+                font-size: 1rem;
+            }
+            
+            .node-label {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-project-diagram"></i>
+            <div>
+                <h1>Dependency <span>Graph</span></h1>
+                <p>Supplier-Product Relationship Visualization</p>
+            </div>
+        </div>
+        <a href="suppliers.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="main-container">
+        <!-- Main Graph Area -->
+        <div class="graph-panel">
+            <div class="graph-controls">
+                <button class="btn btn-primary" id="layout-spread">
+                    <i class="fas fa-expand"></i> Spread
+                </button>
+                <button class="btn btn-primary" id="layout-circle">
+                    <i class="fas fa-circle"></i> Circle
+                </button>
+                <button class="btn btn-danger" id="simulate-btn">
+                    <i class="fas fa-skull-crossbones"></i> Fail Random
+                </button>
+                <button class="btn btn-success" id="reset-btn">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+                <button class="btn btn-warning" id="auto-layout">
+                    <i class="fas fa-magic"></i> Auto Arrange
+                </button>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <div class="graph-container" id="graph-container">
+                <!-- Graph will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <div class="panel-section">
+                <h3 class="panel-title"><i class="fas fa-info-circle"></i> Selected Node</h3>
+                <div id="node-details">
+                    <div style="text-align: center; color: #666; padding: 15px;">
+                        <i class="fas fa-mouse-pointer" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem;">Click on any node to view details</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title"><i class="fas fa-key"></i> Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-supplier"></div>
+                        <div class="legend-text">Supplier Node</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-product"></div>
+                        <div class="legend-text">Product Node</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-failed"></div>
+                        <div class="legend-text">Failed Node</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-at-risk"></div>
+                        <div class="legend-text">At Risk Node</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-safe"></div>
+                        <div class="legend-text">Safe Node</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title"><i class="fas fa-bullseye"></i> Instructions</h3>
+                <div style="color: #666; line-height: 1.5; font-size: 0.9rem;">
+                    <p><strong>1.</strong> Click nodes to select them</p>
+                    <p><strong>2.</strong> Drag nodes to rearrange</p>
+                    <p><strong>3.</strong> Use layout buttons to auto-arrange</p>
+                    <p><strong>4.</strong> Click "Fail Random" to test supplier failure impact</p>
+                    <p><strong>5.</strong> Lines show supplier→product relationships</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        // ==================== GRAPH CONFIGURATION ====================
+        const API_BASE_URL = 'http://localhost:5001/api';
+        
+        // ==================== GRAPH DATA ====================
+        let graphData = {
+            suppliers: [],
+            products: [],
+            simulation: {
+                failedSuppliers: new Set(),
+                failedProducts: new Set(),
+                atRiskProducts: new Set()
+            }
+        };
+
+        // ==================== GRAPH STATE ====================
+        let selectedNode = null;
+        let currentLayout = 'spread';
+        let isDragging = false;
+        let dragNode = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        // ==================== DOM ELEMENTS ====================
+        const graphContainerEl = document.getElementById('graph-container');
+        const alertContainerEl = document.getElementById('alert-container');
+        const nodeDetailsEl = document.getElementById('node-details');
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadGraphData();
+            setupEventListeners();
+            renderGraph();
+        });
+
+        // ==================== DATA LOADING ====================
+        async function loadGraphData() {
+            try {
+                showAlert('Loading graph data from API...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/graph/data`);
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+                
+                const data = await response.json();
+                
+                graphData.suppliers = data.suppliers || [];
+                graphData.products = data.products || [];
+                
+                // Scale positions to fit container
+                scaleNodePositions();
+                
+                showAlert(`Graph loaded: ${graphData.suppliers.length} suppliers, ${graphData.products.length} products`, 'success');
+                
+            } catch (error) {
+                console.error('Failed to load from API:', error);
+                showAlert('Using sample graph data', 'warning');
+                loadSampleData();
+            }
+        }
+
+        function loadSampleData() {
+            graphData = {
+                suppliers: [
+                    { id: "S001", name: "TechSupplies", type: "supplier", risk: "critical", x: 100, y: 100 },
+                    { id: "S002", name: "GlobalParts", type: "supplier", risk: "warning", x: 250, y: 100 },
+                    { id: "S003", name: "QualityComp", type: "supplier", risk: "safe", x: 400, y: 100 },
+                    { id: "S004", name: "ElectroCorp", type: "supplier", risk: "critical", x: 550, y: 100 },
+                    { id: "S005", name: "FastDelivery", type: "supplier", risk: "safe", x: 700, y: 100 },
+                    { id: "S006", name: "Precision", type: "supplier", risk: "warning", x: 850, y: 100 }
+                ],
+                products: [
+                    { id: "P001", name: "Laptop", type: "product", suppliers: ["S001", "S003", "S004"], x: 150, y: 250 },
+                    { id: "P002", name: "Monitor", type: "product", suppliers: ["S002", "S004"], x: 300, y: 250 },
+                    { id: "P003", name: "Keyboard", type: "product", suppliers: ["S001", "S006"], x: 450, y: 250 },
+                    { id: "P004", name: "Mouse", type: "product", suppliers: ["S003"], x: 600, y: 250 },
+                    { id: "P005", name: "USB Hub", type: "product", suppliers: ["S001", "S005"], x: 750, y: 250 },
+                    { id: "P006", name: "SSD", type: "product", suppliers: ["S001", "S004", "S005"], x: 200, y: 400 },
+                    { id: "P007", name: "Webcam", type: "product", suppliers: ["S002", "S003"], x: 350, y: 400 },
+                    { id: "P008", name: "Chair", type: "product", suppliers: ["S006", "S005"], x: 500, y: 400 },
+                    { id: "P009", name: "Lamp", type: "product", suppliers: ["S003", "S005"], x: 650, y: 400 },
+                    { id: "P010", name: "Battery", type: "product", suppliers: ["S004"], x: 800, y: 400 },
+                    { id: "P011", name: "Cables", type: "product", suppliers: ["S001", "S003", "S005"], x: 300, y: 550 },
+                    { id: "P012", name: "Cooler", type: "product", suppliers: ["S002", "S006", "S005"], x: 600, y: 550 }
+                ],
+                simulation: {
+                    failedSuppliers: new Set(),
+                    failedProducts: new Set(),
+                    atRiskProducts: new Set()
+                }
+            };
+            
+            scaleNodePositions();
+        }
+
+        function scaleNodePositions() {
+            const width = graphContainerEl.clientWidth;
+            const height = graphContainerEl.clientHeight;
+            
+            // Scale all positions to fit current container
+            const scaleX = width / 1000;
+            const scaleY = height / 800;
+            
+            graphData.suppliers.forEach(node => {
+                node.x = (node.x || 100) * scaleX;
+                node.y = (node.y || 100) * scaleY;
+            });
+            
+            graphData.products.forEach(node => {
+                node.x = (node.x || 150) * scaleX;
+                node.y = (node.y || 250) * scaleY;
+            });
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            // Layout buttons
+            document.getElementById('layout-spread').addEventListener('click', () => {
+                currentLayout = 'spread';
+                applySpreadLayout();
+                renderGraph();
+                showAlert('Applied spread layout', 'info');
+            });
+            
+            document.getElementById('layout-circle').addEventListener('click', () => {
+                currentLayout = 'circle';
+                applyCircleLayout();
+                renderGraph();
+                showAlert('Applied circle layout', 'info');
+            });
+            
+            document.getElementById('auto-layout').addEventListener('click', () => {
+                applyForceDirectedLayout();
+                renderGraph();
+                showAlert('Auto-arranged nodes', 'success');
+            });
+            
+            // Simulation buttons
+            document.getElementById('simulate-btn').addEventListener('click', simulateFailure);
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Mouse events for dragging
+            graphContainerEl.addEventListener('mousedown', startDrag);
+            graphContainerEl.addEventListener('mousemove', doDrag);
+            graphContainerEl.addEventListener('mouseup', stopDrag);
+            graphContainerEl.addEventListener('mouseleave', stopDrag);
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                scaleNodePositions();
+                renderGraph();
+            });
+        }
+
+        // ==================== LAYOUT FUNCTIONS ====================
+        function applySpreadLayout() {
+            const width = graphContainerEl.clientWidth;
+            const height = graphContainerEl.clientHeight;
+            
+            // Position suppliers in top row
+            const supplierSpacing = width / (graphData.suppliers.length + 1);
+            graphData.suppliers.forEach((supplier, index) => {
+                supplier.x = (index + 1) * supplierSpacing;
+                supplier.y = height * 0.2;
+            });
+            
+            // Position products in grid
+            const cols = 4;
+            const productSpacingX = width / (cols + 1);
+            const productSpacingY = (height * 0.6) / Math.ceil(graphData.products.length / cols);
+            
+            graphData.products.forEach((product, index) => {
+                const row = Math.floor(index / cols);
+                const col = index % cols;
+                product.x = (col + 1) * productSpacingX;
+                product.y = height * 0.4 + (row * productSpacingY);
+            });
+        }
+
+        function applyCircleLayout() {
+            const width = graphContainerEl.clientWidth;
+            const height = graphContainerEl.clientHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.3;
+            
+            // Position suppliers in inner circle
+            graphData.suppliers.forEach((supplier, index) => {
+                const angle = (index / graphData.suppliers.length) * 2 * Math.PI;
+                supplier.x = centerX + Math.cos(angle) * (radius * 0.4);
+                supplier.y = centerY + Math.sin(angle) * (radius * 0.4);
+            });
+            
+            // Position products in outer circle
+            graphData.products.forEach((product, index) => {
+                const angle = (index / graphData.products.length) * 2 * Math.PI;
+                product.x = centerX + Math.cos(angle) * radius;
+                product.y = centerY + Math.sin(angle) * radius;
+            });
+        }
+
+        function applyForceDirectedLayout() {
+            const width = graphContainerEl.clientWidth;
+            const height = graphContainerEl.clientHeight;
+            
+            // Initialize random positions
+            graphData.suppliers.forEach(supplier => {
+                supplier.x = Math.random() * width * 0.7 + width * 0.15;
+                supplier.y = Math.random() * height * 0.3 + height * 0.1;
+            });
+            
+            graphData.products.forEach(product => {
+                product.x = Math.random() * width * 0.7 + width * 0.15;
+                product.y = Math.random() * height * 0.5 + height * 0.3;
+            });
+            
+            // Simple force simulation
+            for (let iter = 0; iter < 20; iter++) {
+                const allNodes = [...graphData.suppliers, ...graphData.products];
+                
+                // Repulsion
+                for (let i = 0; i < allNodes.length; i++) {
+                    for (let j = i + 1; j < allNodes.length; j++) {
+                        const dx = allNodes[j].x - allNodes[i].x;
+                        const dy = allNodes[j].y - allNodes[i].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 80 && distance > 0) {
+                            const force = (80 - distance) / distance * 0.1;
+                            allNodes[i].x -= dx * force;
+                            allNodes[i].y -= dy * force;
+                            allNodes[j].x += dx * force;
+                            allNodes[j].y += dy * force;
+                        }
+                    }
+                }
+                
+                // Attraction between suppliers and their products
+                graphData.products.forEach(product => {
+                    if (product.suppliers && product.suppliers.length > 0) {
+                        let avgX = 0, avgY = 0;
+                        product.suppliers.forEach(supplierId => {
+                            const supplier = graphData.suppliers.find(s => s.id === supplierId);
+                            if (supplier) {
+                                avgX += supplier.x;
+                                avgY += supplier.y;
+                            }
+                        });
+                        
+                        avgX /= product.suppliers.length;
+                        avgY /= product.suppliers.length;
+                        
+                        product.x += (avgX - product.x) * 0.02;
+                        product.y += (avgY - product.y) * 0.02;
+                    }
+                });
+                
+                // Keep within bounds
+                allNodes.forEach(node => {
+                    node.x = Math.max(30, Math.min(width - 30, node.x));
+                    node.y = Math.max(30, Math.min(height - 30, node.y));
+                });
+            }
+        }
+
+        // ==================== GRAPH RENDERING ====================
+        function renderGraph() {
+            // Clear container
+            graphContainerEl.innerHTML = '';
+            
+            // Draw connections first (behind nodes)
+            drawConnections();
+            
+            // Draw nodes
+            drawNodes();
+            
+            // Update selected node details
+            if (selectedNode) {
+                updateNodeDetails(selectedNode.id, selectedNode.type);
+            }
+        }
+
+        function drawNodes() {
+            // Draw supplier nodes
+            graphData.suppliers.forEach(supplier => {
+                const nodeEl = createNodeElement(supplier);
+                graphContainerEl.appendChild(nodeEl);
+            });
+            
+            // Draw product nodes
+            graphData.products.forEach(product => {
+                const nodeEl = createNodeElement(product);
+                graphContainerEl.appendChild(nodeEl);
+            });
+        }
+
+        function createNodeElement(node) {
+            const isSupplier = node.type === 'supplier';
+            const isFailed = isSupplier ? 
+                graphData.simulation.failedSuppliers.has(node.id) :
+                graphData.simulation.failedProducts.has(node.id);
+            
+            const isAtRisk = !isSupplier && graphData.simulation.atRiskProducts.has(node.id);
+            const isSafe = !isSupplier && !isFailed && !isAtRisk;
+            const supplierCount = !isSupplier && node.suppliers ? node.suppliers.length : 0;
+            
+            const nodeEl = document.createElement('div');
+            nodeEl.className = `graph-node ${isSupplier ? 'node-supplier' : 'node-product'} ${isFailed ? 'node-failed' : ''} ${isAtRisk ? 'node-at-risk' : ''} ${isSafe ? 'node-safe' : ''}`;
+            nodeEl.style.left = `${node.x - 30}px`;
+            nodeEl.style.top = `${node.y - 30}px`;
+            nodeEl.dataset.id = node.id;
+            nodeEl.dataset.type = node.type;
+            
+            let icon = isSupplier ? '🏭' : '📦';
+            if (isFailed) icon = '💀';
+            if (isAtRisk) icon = '⚠️';
+            if (isSafe) icon = '✅';
+            
+            nodeEl.innerHTML = `
+                <div class="node-icon">${icon}</div>
+                <div class="node-label">${node.name.substring(0, 6)}</div>
+                <div class="node-details">${isSupplier ? '' : supplierCount + 'S'}</div>
+            `;
+            
+            nodeEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectNode(node.id, node.type);
+            });
+            
+            return nodeEl;
+        }
+
+        function drawConnections() {
+            // Draw connections from suppliers to products
+            graphData.products.forEach(product => {
+                if (product.suppliers) {
+                    product.suppliers.forEach(supplierId => {
+                        const supplier = graphData.suppliers.find(s => s.id === supplierId);
+                        if (supplier) {
+                            drawConnection(supplier, product);
+                        }
+                    });
+                }
+            });
+        }
+
+        function drawConnection(fromNode, toNode) {
+            const dx = toNode.x - fromNode.x;
+            const dy = toNode.y - fromNode.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            const isSupplierFailed = graphData.simulation.failedSuppliers.has(fromNode.id);
+            const isProductFailed = graphData.simulation.failedProducts.has(toNode.id);
+            const isProductAtRisk = graphData.simulation.atRiskProducts.has(toNode.id);
+            
+            const connection = document.createElement('div');
+            connection.className = `graph-connection ${isSupplierFailed || isProductFailed ? 'connection-failed' : ''} ${isProductAtRisk ? 'connection-at-risk' : 'connection-normal'}`;
+            connection.style.width = `${distance}px`;
+            connection.style.left = `${fromNode.x}px`;
+            connection.style.top = `${fromNode.y}px`;
+            connection.style.transform = `rotate(${angle}deg)`;
+            
+            graphContainerEl.appendChild(connection);
+        }
+
+        // ==================== NODE INTERACTION ====================
+        function selectNode(nodeId, nodeType) {
+            selectedNode = { id: nodeId, type: nodeType };
+            updateNodeDetails(nodeId, nodeType);
+            
+            // Highlight node
+            document.querySelectorAll('.graph-node').forEach(node => {
+                node.style.boxShadow = node.dataset.id === nodeId ? 
+                    '0 0 0 3px rgba(52, 152, 219, 0.8)' : 
+                    '0 2px 8px rgba(0, 0, 0, 0.1)';
+            });
+        }
+
+        function updateNodeDetails(nodeId, nodeType) {
+            if (nodeType === 'supplier') {
+                const supplier = graphData.suppliers.find(s => s.id === nodeId);
+                if (!supplier) return;
+                
+                // Find products supplied by this supplier
+                const suppliedProducts = graphData.products.filter(p => 
+                    p.suppliers && p.suppliers.includes(nodeId)
+                );
+                
+                const isFailed = graphData.simulation.failedSuppliers.has(nodeId);
+                
+                nodeDetailsEl.innerHTML = `
+                    <div class="details-header">
+                        <div class="details-icon">${isFailed ? '💀' : '🏭'}</div>
+                        <div>
+                            <div class="details-title">${supplier.name}</div>
+                            <div style="color: #666; font-size: 0.8rem;">${supplier.id}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="details-content">
+                        <div class="details-item">
+                            <span class="item-label">Status:</span>
+                            ${isFailed ? 
+                                '<span style="color: var(--danger); font-weight: 600;">FAILED</span>' : 
+                                `<span style="color: ${supplier.risk === 'critical' ? 'var(--danger)' : supplier.risk === 'warning' ? 'var(--warning)' : 'var(--success)'};">${supplier.risk.toUpperCase()}</span>`
+                            }
+                        </div>
+                        
+                        <div class="details-item">
+                            <span class="item-label">Products:</span>
+                            ${suppliedProducts.length}
+                        </div>
+                        
+                        ${suppliedProducts.length > 0 ? `
+                            <div class="details-item">
+                                <span class="item-label">Supplies:</span>
+                                <div style="margin-top: 5px; font-size: 0.85rem;">
+                                    ${suppliedProducts.map(p => 
+                                        `<div style="margin-bottom: 2px;">• ${p.name}</div>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                const product = graphData.products.find(p => p.id === nodeId);
+                if (!product) return;
+                
+                const suppliers = product.suppliers ? product.suppliers.map(supplierId => {
+                    const supplier = graphData.suppliers.find(s => s.id === supplierId);
+                    return supplier ? supplier.name : supplierId;
+                }) : [];
+                
+                const isFailed = graphData.simulation.failedProducts.has(nodeId);
+                const isAtRisk = graphData.simulation.atRiskProducts.has(nodeId);
+                const status = isFailed ? 'FAILED' : isAtRisk ? 'AT RISK' : 'SAFE';
+                const statusClass = isFailed ? 'danger' : isAtRisk ? 'warning' : 'success';
+                
+                nodeDetailsEl.innerHTML = `
+                    <div class="details-header">
+                        <div class="details-icon">${isFailed ? '💀' : isAtRisk ? '⚠️' : '📦'}</div>
+                        <div>
+                            <div class="details-title">${product.name}</div>
+                            <div style="color: #666; font-size: 0.8rem;">${product.id}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="details-content">
+                        <div class="details-item">
+                            <span class="item-label">Status:</span>
+                            <span style="color: var(--${statusClass}); font-weight: 600;">${status}</span>
+                        </div>
+                        
+                        <div class="details-item">
+                            <span class="item-label">Suppliers:</span>
+                            ${suppliers.length}
+                            ${suppliers.length <= 2 ? 
+                                ' <span style="color: var(--warning);">(Limited)</span>' : 
+                                ' <span style="color: var(--success);">(Adequate)</span>'
+                            }
+                        </div>
+                        
+                        ${suppliers.length > 0 ? `
+                            <div class="details-item">
+                                <span class="item-label">Supplier List:</span>
+                                <div style="margin-top: 5px; font-size: 0.85rem;">
+                                    ${suppliers.map(s => 
+                                        `<div style="margin-bottom: 2px;">• ${s}</div>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${suppliers.length <= 2 ? `
+                            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: var(--border-radius);">
+                                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                                <strong> Warning:</strong> This product has limited supplier options
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== DRAG AND DROP ====================
+        function startDrag(e) {
+            if (e.button !== 0) return;
+            
+            const nodeEl = e.target.closest('.graph-node');
+            if (!nodeEl) return;
+            
+            isDragging = true;
+            dragNode = findNodeById(nodeEl.dataset.id, nodeEl.dataset.type);
+            if (!dragNode) return;
+            
+            const rect = graphContainerEl.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left - dragNode.x;
+            dragOffset.y = e.clientY - rect.top - dragNode.y;
+            
+            e.preventDefault();
+        }
+
+        function doDrag(e) {
+            if (!isDragging || !dragNode) return;
+            
+            const rect = graphContainerEl.getBoundingClientRect();
+            dragNode.x = e.clientX - rect.left - dragOffset.x;
+            dragNode.y = e.clientY - rect.top - dragOffset.y;
+            
+            dragNode.x = Math.max(30, Math.min(graphContainerEl.clientWidth - 30, dragNode.x));
+            dragNode.y = Math.max(30, Math.min(graphContainerEl.clientHeight - 30, dragNode.y));
+            
+            renderGraph();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            dragNode = null;
+        }
+
+        function findNodeById(nodeId, nodeType) {
+            if (nodeType === 'supplier') {
+                return graphData.suppliers.find(s => s.id === nodeId);
+            } else {
+                return graphData.products.find(p => p.id === nodeId);
+            }
+        }
+
+        // ==================== SIMULATION ====================
+        function simulateFailure() {
+            const activeSuppliers = graphData.suppliers.filter(s => 
+                !graphData.simulation.failedSuppliers.has(s.id)
+            );
+            
+            if (activeSuppliers.length === 0) {
+                showAlert('All suppliers have failed! Reset to try again.', 'warning');
+                return;
+            }
+            
+            const randomSupplier = activeSuppliers[Math.floor(Math.random() * activeSuppliers.length)];
+            
+            graphData.simulation.failedSuppliers.add(randomSupplier.id);
+            
+            graphData.products.forEach(product => {
+                if (product.suppliers && product.suppliers.includes(randomSupplier.id)) {
+                    const remainingSuppliers = product.suppliers.filter(s => 
+                        !graphData.simulation.failedSuppliers.has(s)
+                    ).length;
+                    
+                    if (remainingSuppliers === 0) {
+                        graphData.simulation.failedProducts.add(product.id);
+                        graphData.simulation.atRiskProducts.delete(product.id);
+                    } else if (remainingSuppliers <= 2) {
+                        graphData.simulation.atRiskProducts.add(product.id);
+                        graphData.simulation.failedProducts.delete(product.id);
+                    } else {
+                        graphData.simulation.failedProducts.delete(product.id);
+                        graphData.simulation.atRiskProducts.delete(product.id);
+                    }
+                }
+            });
+            
+            renderGraph();
+            showAlert(
+                `Supplier ${randomSupplier.name} failed! ` +
+                `Products affected: ${graphData.products.filter(p => p.suppliers && p.suppliers.includes(randomSupplier.id)).length}`,
+                'danger'
+            );
+        }
+
+        function resetSimulation() {
+            graphData.simulation.failedSuppliers.clear();
+            graphData.simulation.failedProducts.clear();
+            graphData.simulation.atRiskProducts.clear();
+            
+            renderGraph();
+            showAlert('Simulation reset. All suppliers and products restored.', 'success');
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function showAlert(message, type = 'info') {
+            const existingAlerts = alertContainerEl.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type}`;
+            alertEl.innerHTML = `
+                <span>${message}</span>
+                <button class="close-alert">&times;</button>
+            `;
+            
+            alertContainerEl.appendChild(alertEl);
+            
+            alertEl.querySelector('.close-alert').addEventListener('click', () => {
+                alertEl.remove();
+            });
+            
+            setTimeout(() => {
+                if (alertEl.parentNode) {
+                    alertEl.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

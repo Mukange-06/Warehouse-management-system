@@ -1,0 +1,86 @@
+[
+  {
+    "product_id": "E0004",
+    "name": "Mechanical Keyboard",
+    "category": "Electronics",
+    "quantity": 45,
+    "price": 89.5
+  },
+  {
+    "product_id": "E0006",
+    "name": "USB-C hub",
+    "category": "Electronics",
+    "quantity": 75,
+    "price": 34.99
+  },
+  {
+    "product_id": "F0001",
+    "name": "Office Desk",
+    "category": "Furniture",
+    "quantity": 20,
+    "price": 330.0
+  },
+  {
+    "product_id": "E0007",
+    "name": "External SSD 1TB",
+    "category": "Electronics",
+    "quantity": 22,
+    "price": 129.99
+  },
+  {
+    "product_id": "E0005",
+    "name": "27\" Monitor",
+    "category": "Electronics",
+    "quantity": 30,
+    "price": 210.0
+  },
+  {
+    "product_id": "F0002",
+    "name": "Chairs",
+    "category": "Furniture",
+    "quantity": 14,
+    "price": 185.0
+  },
+  {
+    "product_id": "F0003",
+    "name": "Bookshelf",
+    "category": "Furniture",
+    "quantity": 20,
+    "price": 140.0
+  },
+  {
+    "product_id": "E0002",
+    "name": "Laptop Air 13 ",
+    "category": "Electronics",
+    "quantity": 18,
+    "price": 980.0
+  },
+  {
+    "product_id": "E0001",
+    "name": "Laptop pro 14",
+    "category": "Electronics",
+    "quantity": 12,
+    "price": 1450.0
+  },
+  {
+    "product_id": "C1001",
+    "name": "T-shirt",
+    "category": "Clothing",
+    "quantity": 100,
+    "price": 5.0
+  },
+  {
+    "product_id": "F0004",
+    "name": "Filling Cabinet",
+    "category": "Furniture",
+    "quantity": 8,
+    "price": 260.0
+  },
+  {
+    "product_id": "E0003",
+    "name": "Wireless Mouse",
+    "category": "Electronics",
+    "quantity": 120,
+    "price": 18.99
+  }
+]

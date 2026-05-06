@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Delivery System | Fulfilment Engine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --purple: #9b59b6;
+            --teal: #1abc9c;
+            --light: #ecf0f1;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #1a2530);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--teal);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--teal);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 0;
+            min-height: 700px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #eee;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title i {
+            color: var(--secondary);
+        }
+
+        /* Warehouse Controls */
+        .warehouse-controls {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Route Info */
+        .route-info {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .route-details {
+            margin-top: 15px;
+        }
+
+        .route-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .route-item:last-child {
+            border-bottom: none;
+        }
+
+        .route-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .route-value {
+            color: #666;
+        }
+
+        .highlight {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Visualization Panel */
+        .visualization-panel {
+            background: white;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .graph-container {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 400px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .graph-placeholder {
+            text-align: center;
+            color: #95a5a6;
+            padding: 20px;
+        }
+
+        .graph-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        /* Warehouse Nodes */
+        .warehouse-node {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .warehouse-node:hover {
+            transform: scale(1.1);
+            z-index: 100;
+        }
+
+        .node-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #333;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .warehouse-main {
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            border: 3px solid white;
+        }
+
+        .warehouse-regional {
+            background: linear-gradient(135deg, var(--success), #27ae60);
+            border: 3px solid white;
+        }
+
+        .warehouse-local {
+            background: linear-gradient(135deg, var(--warning), #f39c12);
+            border: 3px solid white;
+        }
+
+        /* Connections */
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: #95a5a6;
+            transform-origin: 0 0;
+            z-index: 1;
+        }
+
+        .connection-optimal {
+            background: var(--success);
+            height: 4px;
+            box-shadow: 0 0 5px var(--success);
+        }
+
+        /* Warehouse List */
+        .warehouse-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .warehouse-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .warehouse-card h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .warehouse-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid var(--danger);
+        }
+
+        .close-alert {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        /* Fulfilment Stats */
+        .fulfilment-stats {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-route"></i>
+                <div>
+                    <h1>Fulfilment<span>Engine</span></h1>
+                    <p>DSA-based Warehouse & Delivery System</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">
+                    <i class="fas fa-warehouse"></i> Inventory
+                </a>
+                <a href="dsa.html" class="nav-btn" onclick="showDSAInfo()">
+                    <i class="fas fa-code"></i> DSA Used
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel: Controls -->
+            <div class="control-panel">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> Delivery Controls</h2>
+                
+                <div class="warehouse-controls">
+                    <div class="form-group">
+                        <label for="source-warehouse"><i class="fas fa-warehouse"></i> Source Warehouse</label>
+                        <select id="source-warehouse">
+                            <option value="main">🏢 Main Warehouse (Central Hub)</option>
+                            <option value="north">📍 North Regional Warehouse</option>
+                            <option value="south">📍 South Regional Warehouse</option>
+                            <option value="east">📍 East Regional Warehouse</option>
+                            <option value="west">📍 West Regional Warehouse</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destination"><i class="fas fa-map-marker-alt"></i> Destination</label>
+                        <select id="destination">
+                            <option value="north">📍 North Regional Warehouse</option>
+                            <option value="south">📍 South Regional Warehouse</option>
+                            <option value="east">📍 East Regional Warehouse</option>
+                            <option value="west">📍 West Regional Warehouse</option>
+                            <option value="local1">🏪 Local Store #1</option>
+                            <option value="local2">🏪 Local Store #2</option>
+                            <option value="local3">🏪 Local Store #3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-type"><i class="fas fa-box"></i> Product Type</label>
+                        <select id="product-type">
+                            <option value="standard">📦 Standard Goods</option>
+                            <option value="furniture">🛋️ Furniture (Large)</option>
+                            <option value="electronics">📱 Electronics (Fragile)</option>
+                            <option value="food">🍎 Food (Perishable)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="delivery-urgency"><i class="fas fa-clock"></i> Delivery Urgency</label>
+                        <select id="delivery-urgency">
+                            <option value="standard">🚚 Standard</option>
+                            <option value="express">⚡ Express</option>
+                            <option value="urgent">🔥 Urgent</option>
+                        </select>
+                    </div>
+
+                    <button id="calculate-route" class="btn btn-primary btn-block">
+                        <i class="fas fa-route"></i> Calculate Optimal Route (Dijkstra)
+                    </button>
+
+                    <button id="place-order" class="btn btn-success btn-block">
+                        <i class="fas fa-shopping-cart"></i> Place Test Order
+                    </button>
+                </div>
+
+                <!-- Route Information -->
+                <div class="route-info">
+                    <h3><i class="fas fa-info-circle"></i> Route Information</h3>
+                    <div class="route-details" id="route-details">
+                        <div class="route-item">
+                            <span class="route-label">Algorithm:</span>
+                            <span class="route-value" id="algorithm-used">-</span>
+                        </div>
+                        <div class="route-item">
+                            <span class="route-label">Total Distance:</span>
+                            <span class="route-value" id="total-distance">-</span>
+                        </div>
+                        <div class="route-item">
+                            <span class="route-label">Estimated Time:</span>
+                            <span class="route-value" id="estimated-time">-</span>
+                        </div>
+                        <div class="route-item">
+                            <span class="route-label">Cost:</span>
+                            <span class="route-value" id="delivery-cost">-</span>
+                        </div>
+                        <div class="route-item">
+                            <span class="route-label">Optimal Path:</span>
+                            <span class="route-value" id="optimal-path">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fulfilment Statistics -->
+                <div class="fulfilment-stats">
+                    <h3><i class="fas fa-chart-bar"></i> Fulfilment Engine Stats</h3>
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value" id="fulfilled-orders">0</div>
+                            <div class="stat-label">Orders Fulfilled</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="pending-orders">0</div>
+                            <div class="stat-label">Pending Orders</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="total-distance-stats">0</div>
+                            <div class="stat-label">Total km Delivered</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="warehouse-count">8</div>
+                            <div class="stat-label">Warehouses</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Graph Visualization -->
+            <div class="visualization-panel">
+                <h2 class="panel-title"><i class="fas fa-project-diagram"></i> Fulfilment Graph</h2>
+                
+                <div id="alert-container"></div>
+                
+                <div class="graph-container" id="graph-container">
+                    <div class="graph-placeholder" id="graph-placeholder">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>Fulfilment Network Graph</h3>
+                        <p>Uses Dijkstra's algorithm for optimal routing</p>
+                    </div>
+                    <!-- Graph elements will be rendered here -->
+                </div>
+
+                <div class="form-group">
+                    <label for="graph-layout"><i class="fas fa-network-wired"></i> Graph Layout</label>
+                    <select id="graph-layout">
+                        <option value="force">Force-Directed Layout</option>
+                        <option value="radial">Radial Layout</option>
+                        <option value="hierarchical">Hierarchical Layout</option>
+                    </select>
+                </div>
+
+                <button id="refresh-graph" class="btn" style="background-color: var(--teal); color: white;">
+                    <i class="fas fa-sync-alt"></i> Refresh Graph Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DELIVERY SYSTEM WITH FULFILMENT ENGINE ====================
+        const API_BASE_URL = 'http://localhost:5001/api';
+        
+        // Warehouse Network Data (for fallback)
+        const warehouseNetwork = {
+            nodes: [
+                { id: 'main', name: 'Main Warehouse', type: 'main', x: 50, y: 50 },
+                { id: 'north', name: 'North Regional', type: 'regional', x: 20, y: 20 },
+                { id: 'south', name: 'South Regional', type: 'regional', x: 20, y: 80 },
+                { id: 'east', name: 'East Regional', type: 'regional', x: 80, y: 50 },
+                { id: 'west', name: 'West Regional', type: 'regional', x: 80, y: 20 },
+                { id: 'local1', name: 'Local Store #1', type: 'local', x: 10, y: 50 },
+                { id: 'local2', name: 'Local Store #2', type: 'local', x: 90, y: 80 },
+                { id: 'local3', name: 'Local Store #3', type: 'local', x: 50, y: 90 }
+            ],
+            
+            edges: [
+                { from: 'main', to: 'north', distance: 150 },
+                { from: 'main', to: 'south', distance: 200 },
+                { from: 'main', to: 'east', distance: 180 },
+                { from: 'main', to: 'west', distance: 120 },
+                { from: 'north', to: 'local1', distance: 50 },
+                { from: 'south', to: 'local3', distance: 60 },
+                { from: 'east', to: 'local2', distance: 70 },
+                { from: 'west', to: 'local2', distance: 90 },
+                { from: 'north', to: 'east', distance: 220 },
+                { from: 'south', to: 'west', distance: 250 }
+            ]
+        };
+
+        // DOM Elements
+        const sourceSelect = document.getElementById('source-warehouse');
+        const destinationSelect = document.getElementById('destination');
+        const productTypeSelect = document.getElementById('product-type');
+        const urgencySelect = document.getElementById('delivery-urgency');
+        const calculateBtn = document.getElementById('calculate-route');
+        const placeOrderBtn = document.getElementById('place-order');
+        const refreshGraphBtn = document.getElementById('refresh-graph');
+        const graphContainer = document.getElementById('graph-container');
+        const graphPlaceholder = document.getElementById('graph-placeholder');
+        const alertContainer = document.getElementById('alert-container');
+        const algorithmUsedEl = document.getElementById('algorithm-used');
+        const totalDistanceEl = document.getElementById('total-distance');
+        const estimatedTimeEl = document.getElementById('estimated-time');
+        const deliveryCostEl = document.getElementById('delivery-cost');
+        const optimalPathEl = document.getElementById('optimal-path');
+        const graphLayoutSelect = document.getElementById('graph-layout');
+        
+        // Stats elements
+        const fulfilledOrdersEl = document.getElementById('fulfilled-orders');
+        const pendingOrdersEl = document.getElementById('pending-orders');
+        const totalDistanceStatsEl = document.getElementById('total-distance-stats');
+        const warehouseCountEl = document.getElementById('warehouse-count');
+
+        let currentRoute = null;
+        let optimalPath = [];
+        let graphData = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFulfilmentStats();
+            loadGraphData();
+            setupEventListeners();
+            
+            // Show DSA info on load
+            setTimeout(showDSAInfo, 1000);
+        });
+
+        function setupEventListeners() {
+            calculateBtn.addEventListener('click', calculateRoute);
+            placeOrderBtn.addEventListener('click', placeTestOrder);
+            refreshGraphBtn.addEventListener('click', loadGraphData);
+            graphLayoutSelect.addEventListener('change', renderGraph);
+            
+            // Auto-calculate when selections change
+            [sourceSelect, destinationSelect, productTypeSelect, urgencySelect].forEach(select => {
+                select.addEventListener('change', () => {
+                    if (sourceSelect.value && destinationSelect.value) {
+                        calculateRoute();
+                    }
+                });
+            });
+        }
+
+        async function calculateRoute() {
+            const source = sourceSelect.value;
+            const destination = destinationSelect.value;
+            const productType = productTypeSelect.value;
+            const urgency = urgencySelect.value;
+            
+            if (source === destination) {
+                showAlert('Source and destination cannot be the same!', 'error');
+                return;
+            }
+            
+            try {
+                // Use the fulfilment engine API
+                const response = await fetch(`${API_BASE_URL}/delivery/route`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        source: source,
+                        destination: destination,
+                        product_type: productType,
+                        urgency: urgency
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                currentRoute = result;
+                optimalPath = result.path || [];
+                
+                // Update UI
+                algorithmUsedEl.textContent = result.algorithm || 'Dijkstra';
+                totalDistanceEl.textContent = `${result.distance} km`;
+                estimatedTimeEl.textContent = `${result.estimated_time} hours`;
+                deliveryCostEl.textContent = `$${result.cost}`;
+                optimalPathEl.textContent = optimalPath.join(' → ');
+                
+                // Highlight optimal path on graph
+                highlightOptimalPath();
+                
+                showAlert(result.message || 'Route calculated using Dijkstra algorithm', 'success');
+                
+            } catch (error) {
+                console.error('Route calculation error:', error);
+                showAlert('Route calculation failed: ' + error.message, 'error');
+            }
+        }
+
+        async function placeTestOrder() {
+            try {
+                const orderData = {
+                    order_id: `ORD${Date.now()}`,
+                    customer_id: "CUST001",
+                    destination: destinationSelect.value,
+                    urgency: urgencySelect.value,
+                    items: [
+                        {
+                            product_id: "P001",
+                            quantity: Math.floor(Math.random() * 5) + 1,
+                            product_type: productTypeSelect.value
+                        },
+                        {
+                            product_id: "P002", 
+                            quantity: Math.floor(Math.random() * 3) + 1,
+                            product_type: "standard"
+                        }
+                    ]
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/fulfilment/order`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to place order: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                showAlert(`Order ${orderData.order_id} placed successfully!`, 'success');
+                
+                // Refresh stats
+                loadFulfilmentStats();
+                
+            } catch (error) {
+                console.error('Order placement error:', error);
+                showAlert('Failed to place order: ' + error.message, 'error');
+            }
+        }
+
+        async function processNextOrder() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/fulfilment/process`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to process order: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.status === 'no_orders') {
+                    showAlert('No pending orders to process', 'info');
+                } else {
+                    showAlert(`Order ${result.order_id} ${result.status}`, 'success');
+                    loadFulfilmentStats();
+                }
+                
+            } catch (error) {
+                console.error('Order processing error:', error);
+                showAlert('Failed to process order: ' + error.message, 'error');
+            }
+        }
+
+        async function loadFulfilmentStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/fulfilment/stats`);
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    fulfilledOrdersEl.textContent = stats.fulfilled_orders || 0;
+                    pendingOrdersEl.textContent = stats.pending_orders || 0;
+                    totalDistanceStatsEl.textContent = stats.total_delivery_distance || 0;
+                    warehouseCountEl.textContent = stats.warehouse_count || 8;
+                }
+                
+            } catch (error) {
+                console.log('Using default stats');
+            }
+        }
+
+        async function loadGraphData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/graph/data`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load graph data: ${response.status}`);
+                }
+                
+                graphData = await response.json();
+                renderGraph();
+                showAlert('Graph data loaded from fulfilment engine', 'success');
+                
+            } catch (error) {
+                console.error('Graph data error:', error);
+                showAlert('Using fallback graph data', 'info');
+                graphData = null;
+                renderGraph();
+            }
+        }
+
+        function renderGraph() {
+            // Clear previous graph
+            // Clear previous graph
+            graphContainer.innerHTML = '';
+
+            // Remove placeholder
+            graphPlaceholder.style.display = 'none';
+
+            const layout = graphLayoutSelect.value;
+            const data = graphData || createFallbackGraphData();
+
+            // Create an SVG overlay for connections
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.style.position = 'absolute';
+            svg.style.left = '0';
+            svg.style.top = '0';
+            svg.style.zIndex = '1';
+            graphContainer.appendChild(svg);
+
+            // Normalize node positions into container space
+            const w = graphContainer.clientWidth;
+            const h = graphContainer.clientHeight;
+            const padding = Math.min(60, Math.min(w, h) * 0.12);
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            data.nodes.forEach(n => {
+                minX = Math.min(minX, n.x);
+                maxX = Math.max(maxX, n.x);
+                minY = Math.min(minY, n.y);
+                maxY = Math.max(maxY, n.y);
+            });
+
+            if (!isFinite(minX)) { minX = 0; maxX = w; minY = 0; maxY = h; }
+            if (minX === maxX) { minX -= 1; maxX += 1; }
+            if (minY === maxY) { minY -= 1; maxY += 1; }
+
+            const mapX = x => padding + ((x - minX) / (maxX - minX)) * (w - 2 * padding);
+            const mapY = y => padding + ((y - minY) / (maxY - minY)) * (h - 2 * padding);
+
+            // Store computed positions
+            const positions = {};
+
+            // Draw nodes first (so labels sit above connections)
+            data.nodes.forEach(node => {
+                const nx = mapX(node.x);
+                const ny = mapY(node.y);
+                positions[node.id] = { x: nx, y: ny, node };
+                drawNode(node, layout, nx, ny);
+            });
+
+            // Draw edges using SVG lines
+            data.edges.forEach(edge => {
+                drawConnection(edge, svg, positions);
+            });
+
+            // Highlight optimal path if exists
+            if (optimalPath.length > 0) {
+                highlightOptimalPath(svg, positions);
+            }
+        }
+
+        function createFallbackGraphData() {
+            const containerWidth = graphContainer.clientWidth;
+            const containerHeight = graphContainer.clientHeight;
+            
+            const nodes = warehouseNetwork.nodes.map((node, index) => {
+                const angle = (index / warehouseNetwork.nodes.length) * 2 * Math.PI;
+                return {
+                    id: node.id,
+                    label: node.name,
+                    x: containerWidth/2 + Math.cos(angle) * (containerWidth * 0.3),
+                    y: containerHeight/2 + Math.sin(angle) * (containerHeight * 0.3),
+                    type: node.type
+                };
+            });
+            
+            const edges = warehouseNetwork.edges.map(edge => ({
+                from: edge.from,
+                to: edge.to,
+                label: `${edge.distance}km`,
+                weight: edge.distance
+            }));
+            
+            return { nodes, edges };
+        }
+
+        function drawNode(node, layout, x, y) {
+            const nodeEl = document.createElement('div');
+
+            // Determine node class based on type
+            let nodeClass = 'warehouse-';
+            if (node.type === 'main' || node.type === 'hub') nodeClass += 'main';
+            else if (node.type === 'regional') nodeClass += 'regional';
+            else nodeClass += 'local';
+
+            nodeEl.className = `warehouse-node ${nodeClass}`;
+            nodeEl.id = `node-${node.id}`;
+            // Position using computed center coordinates
+            nodeEl.style.left = `${x - 36}px`;
+            nodeEl.style.top = `${y - 36}px`;
+            nodeEl.title = `${node.label}\nID: ${node.id}`;
+
+            // Add icon based on type
+            let icon = '🏢';
+            if (node.type === 'regional') icon = '📍';
+            if (node.type === 'local' || node.type === 'store') icon = '🏪';
+
+            nodeEl.innerHTML = `<span style="font-size: 1.6rem">${icon}</span>`;
+
+            // Add click event
+            nodeEl.addEventListener('click', () => {
+                showAlert(`Selected: ${node.label}`, 'info');
+                // Auto-select in dropdowns
+                sourceSelect.value = node.id;
+                calculateRoute();
+            });
+
+            graphContainer.appendChild(nodeEl);
+
+            // Add a small label above the node
+            const label = document.createElement('div');
+            label.className = 'node-label';
+            label.style.left = `${x}px`;
+            label.style.top = `${y - 58}px`;
+            label.textContent = node.label;
+            graphContainer.appendChild(label);
+        }
+
+        function drawConnection(edge, svg, positions) {
+            const from = positions[edge.from];
+            const to = positions[edge.to];
+            if (!from || !to) return;
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const line = document.createElementNS(svgNS, 'line');
+            line.setAttribute('x1', from.x);
+            line.setAttribute('y1', from.y);
+            line.setAttribute('x2', to.x);
+            line.setAttribute('y2', to.y);
+            line.setAttribute('stroke', '#95a5a6');
+            line.setAttribute('stroke-width', '3');
+            line.setAttribute('data-from', edge.from);
+            line.setAttribute('data-to', edge.to);
+            line.setAttribute('id', `edge-${edge.from}-${edge.to}`);
+            line.style.opacity = 0.95;
+            svg.appendChild(line);
+
+            // Optional: small midpoint label for distance
+            try {
+                const midX = (from.x + to.x) / 2;
+                const midY = (from.y + to.y) / 2;
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('x', midX);
+                text.setAttribute('y', midY - 6);
+                text.setAttribute('fill', '#666');
+                text.setAttribute('font-size', '11');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = edge.label || '';
+                svg.appendChild(text);
+            } catch (e) {
+                // ignore label issues
+            }
+        }
+
+        function highlightOptimalPath(svg, positions) {
+            // If svg not provided, try to find it in the container
+            if (!svg) {
+                svg = graphContainer.querySelector('svg');
+                if (!svg) return; // nothing to highlight
+            }
+
+            // If positions not provided, build from current DOM node elements
+            if (!positions) {
+                positions = {};
+                const containerRect = graphContainer.getBoundingClientRect();
+                document.querySelectorAll('.warehouse-node').forEach(nodeEl => {
+                    const id = nodeEl.id && nodeEl.id.replace(/^node-/, '');
+                    if (!id) return;
+                    const rect = nodeEl.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2 - containerRect.left;
+                    const cy = rect.top + rect.height / 2 - containerRect.top;
+                    positions[id] = { x: cx, y: cy };
+                });
+            }
+
+            // Remove previous highlights (SVG lines with class 'optimal')
+            svg.querySelectorAll('.optimal').forEach(el => el.remove());
+
+            for (let i = 0; i < optimalPath.length - 1; i++) {
+                const fromId = optimalPath[i];
+                const toId = optimalPath[i + 1];
+
+                // Try both directions
+                const primary = svg.getElementById(`edge-${fromId}-${toId}`);
+                const secondary = svg.getElementById(`edge-${toId}-${fromId}`);
+                const target = primary || secondary;
+                if (target) {
+                    const svgNS = 'http://www.w3.org/2000/svg';
+                    const cap = document.createElementNS(svgNS, 'line');
+                    cap.setAttribute('x1', target.getAttribute('x1'));
+                    cap.setAttribute('y1', target.getAttribute('y1'));
+                    cap.setAttribute('x2', target.getAttribute('x2'));
+                    cap.setAttribute('y2', target.getAttribute('y2'));
+                    cap.setAttribute('stroke', 'rgba(46, 204, 113, 0.95)');
+                    cap.setAttribute('stroke-width', '5');
+                    cap.setAttribute('class', 'optimal');
+                    cap.style.filter = 'drop-shadow(0 0 6px rgba(46,204,113,0.6))';
+                    svg.appendChild(cap);
+                } else {
+                    // As a fallback, if SVG edge missing but positions are available, draw highlight line
+                    const pFrom = positions && positions[fromId];
+                    const pTo = positions && positions[toId];
+                    if (pFrom && pTo) {
+                        const svgNS = 'http://www.w3.org/2000/svg';
+                        const cap = document.createElementNS(svgNS, 'line');
+                        cap.setAttribute('x1', pFrom.x);
+                        cap.setAttribute('y1', pFrom.y);
+                        cap.setAttribute('x2', pTo.x);
+                        cap.setAttribute('y2', pTo.y);
+                        cap.setAttribute('stroke', 'rgba(46, 204, 113, 0.95)');
+                        cap.setAttribute('stroke-width', '5');
+                        cap.setAttribute('class', 'optimal');
+                        cap.style.filter = 'drop-shadow(0 0 6px rgba(46,204,113,0.6))';
+                        svg.appendChild(cap);
+                    }
+                }
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlerts = alertContainer.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type}`;
+            alertEl.innerHTML = `
+                <span>${message}</span>
+                <button class="close-alert">&times;</button>
+            `;
+            
+            alertContainer.appendChild(alertEl);
+            
+            // Add event listener to close button
+            alertEl.querySelector('.close-alert').addEventListener('click', () => {
+                alertEl.remove();
+            });
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertEl.parentNode) {
+                    alertEl.remove();
+                }
+            }, 5000);
+        }
+
+        function showDSAInfo() {
+            showAlert(`
+                <strong>DSA Components in Action:</strong><br>
+                • <strong>Graph + Dijkstra</strong> - Optimal routing (O(E log V))<br>
+                • <strong>Priority Queues</strong> - Order scheduling (heap-based)<br>
+                • <strong>Greedy Algorithms</strong> - Warehouse selection<br>
+                • <strong>Hash Tables</strong> - Inventory storage (O(1) lookup)<br>
+                • <strong>Binary Search Trees</strong> - Price indexing (O(log n) search)
+            `, 'info');
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', renderGraph);
+        
+        // Auto-refresh stats every 10 seconds
+        setInterval(loadFulfilmentStats, 10000);
+    </script>
+</body>
+</html>
